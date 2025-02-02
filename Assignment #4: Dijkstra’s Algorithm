@@ -1,0 +1,92 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_map>
+#include <limits>
+#include <stack>
+
+using namespace std;
+
+const int INF = numeric_limits<int>::max();
+
+// Define a structure to represent an edge
+struct Edge {
+    int destination, weight;
+};
+
+// Function to perform Dijkstra's algorithm
+void dijkstra(int start, int end, unordered_map<int, vector<Edge>>& graph, int numNodes) {
+    vector<int> distance(numNodes, INF);         // Distance array
+    vector<int> parent(numNodes, -1);            // To store the path
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<>> pq;
+
+    // Start node setup
+    distance[start] = 0;
+    pq.push({0, start});
+
+    while (!pq.empty()) {
+        int currentDist = pq.top().first;
+        int currentNode = pq.top().second;
+        pq.pop();
+
+        // Skip if we already have a shorter path to this node
+        if (currentDist > distance[currentNode]) continue;
+
+        // Relax edges
+        for (const Edge& edge : graph[currentNode]) {
+            int neighbor = edge.destination;
+            int newDist = currentDist + edge.weight;
+
+            if (newDist < distance[neighbor]) {
+                distance[neighbor] = newDist;
+                parent[neighbor] = currentNode;
+                pq.push({newDist, neighbor});
+            }
+        }
+    }
+
+    // Output results
+    if (distance[end] == INF) {
+        cout << "No path exists between the nodes." << endl;
+    } else {
+        cout << "Shortest path cost: " << distance[end] << endl;
+        
+        // Reconstruct the path
+        stack<int> path;
+        for (int at = end; at != -1; at = parent[at]) {
+            path.push(at);
+        }
+
+        cout << "Path: ";
+        while (!path.empty()) {
+            cout << path.top();
+            path.pop();
+            if (!path.empty()) cout << " -> ";
+        }
+        cout << endl;
+    }
+}
+
+int main() {
+    unordered_map<int, vector<Edge>> graph;
+    int numNodes = 5;  // Adjust based on your graph
+
+    // Define your graph here (hardcoded example based on images)
+    graph[0] = {{1, 10}, {4, 3}};
+    graph[1] = {{2, 2}};
+    graph[4] = {{1, 1}, {2, 8}};
+    graph[2] = {{3, 7}};
+    graph[3] = {{4, 2}};
+
+    // Get user input for source and destination nodes
+    int startNode, endNode;
+    cout << "Enter the starting node (0-4): ";
+    cin >> startNode;
+    cout << "Enter the destination node (0-4): ";
+    cin >> endNode;
+
+    // Run Dijkstra's algorithm
+    dijkstra(startNode, endNode, graph, numNodes);
+
+    return 0;
+}
